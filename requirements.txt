@@ -17,3 +17,5 @@ passlib
 bcrypt
 python-dotenv
 python-multipart
+clerk-sdk
+clerk-backend-api

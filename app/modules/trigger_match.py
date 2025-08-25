@@ -2,7 +2,8 @@ import os
 import requests
 
 class TriggerMatch():
-    url = f"https://onction-matching-engine-762140739532.europe-west2.run.app/v1/match"
+    # url = f"https://onction-matching-engine-762140739532.europe-west2.run.app/v1/match"
+    url = f"http://144.91.85.115:8000/v1/match"
     api_key = os.getenv('API_KEY')
     def __init__(self):
         pass

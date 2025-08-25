@@ -28,8 +28,8 @@ class CommonName(Enum):
     UTILITY_Z: str = "Utility Z"
 
 class Create(SQLModel):
-    common_name: CommonName
-    trader_id:  CommonName
+    common_name: str
+    trader_id:  str
     order_type: OrderType
     quantity: int
     price: float
@@ -37,11 +37,12 @@ class Create(SQLModel):
     delivery_day: date
     max_dispatch: int
     quantity_filled: int
+    created_by: Optional[str] = None
 
 class Order(Create, table=True):
     order_ref: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    common_name: str = CommonName
-    trader_id: str = CommonName
+    common_name: str
+    trader_id: str 
     order_type: str = OrderType
     quantity: int
     price: float
@@ -51,6 +52,7 @@ class Order(Create, table=True):
     max_dispatch: int
     quantity_filled: int
     status: Optional[Status] = Status.PENDING
+    created_by: Optional[str]
 
 class Trades(SQLModel, table=True):
     id: Optional[int] = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -71,7 +73,7 @@ class ShowOrder(Order):
 
 class Update(Create):
     common_name: str = CommonName
-    trader_id: str= CommonName
+    trader_id: str = CommonName
     order_type: str = OrderType
     quantity: int
     price: float
@@ -80,7 +82,7 @@ class Update(Create):
     fully_matched: Optional[bool] = False
     max_dispatch: int
     quantity_filled: int
-    status: Status
+    # status: Optional[Status] = None
 
 class Message(BaseModel):
     message: str
