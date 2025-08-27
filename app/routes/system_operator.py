@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from typing import  Annotated, Any
-from models import Order, Trades, Message, Status
+from typing import  Annotated, Any, Union, List
+from models import Order, Trades, Message, Status, Create, ShowOrder
 from sqlmodel import Session,  select
 from db.db import get_db
 from datetime import date
@@ -24,11 +24,12 @@ def trigger_matching_engine(session: SessionInit, date: date) ->  Any:
                     **order.dict(exclude={"status"}), 
                     "order_ref": str(order.order_ref), 
                     "delivery_day": str(order.delivery_day), 
-                    "timeslot": str(order.timeslot) 
+                    "timeslot": str(order.timeslot),
                     }for order in orders]
         data = TriggerMatch().trigger_matching_engine(params, payload)
+        print(f'Payload: {data}')
 
-        if data == []:
+        if data is None or data == []:
             raise HTTPException(status_code=404, detail=str(data))
         else:
             for new_trade in data:
@@ -102,3 +103,20 @@ def all_bid(*, session: SessionInit) ->  Any:
         return bid
     except Exception as error:
          raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))
+    
+
+
+@router.post("/submit_offer", response_model=Union[Message,ShowOrder], status_code=status.HTTP_201_CREATED)
+def create_offer(*, session: SessionInit, offer_in: List[Create]) -> Any:
+    create_offer = []
+    try:
+        for offer in offer_in:
+            offer = Order.model_validate(offer)
+            session.add(offer)
+            session.commit()
+            session.refresh(offer)
+        create_offer.append(offer)
+        return Message(
+            message="Offer submitted successfully")
+    except Exception as error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))

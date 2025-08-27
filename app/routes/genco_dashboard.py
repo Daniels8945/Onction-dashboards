@@ -20,7 +20,7 @@ def all_offer(
     user_id = user_details.get("user_id")
     if user_details:
         try:
-            offer = session.query(Order).filter(Order.created_by == user_id).all()
+            offer = session.query(Order).filter(Order.trader_id == user_id).all()
             return offer
         except Exception as error:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))
@@ -52,7 +52,7 @@ def create_offer(
 
         for offer in offer_in:
             order_data = offer.dict()
-            order_data["created_by"] = str(user_id)
+            order_data["trader_id"] = str(user_id)
             order_data = Order.model_validate(order_data)
             session.add(order_data)
             session.commit()
@@ -79,7 +79,7 @@ def update_offer(*,
             if not offer:
                 raise HTTPException(status_code=404, detail="Offer not found")
             
-            if offer.created_by != user_id:
+            if offer.trader_id != user_id:
                 raise HTTPException(status_code=403, detail="Not authorized to update this offer")
             else: 
                 update_offer = offer_in.model_dump(exclude_unset=True)

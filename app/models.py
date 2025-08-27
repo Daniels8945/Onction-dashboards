@@ -37,7 +37,7 @@ class Create(SQLModel):
     delivery_day: date
     max_dispatch: int
     quantity_filled: int
-    created_by: Optional[str] = None
+    # created_by: Optional[str] = None
 
 class Order(Create, table=True):
     order_ref: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -52,7 +52,7 @@ class Order(Create, table=True):
     max_dispatch: int
     quantity_filled: int
     status: Optional[Status] = Status.PENDING
-    created_by: Optional[str]
+    # created_by: Optional[str]
 
 class Trades(SQLModel, table=True):
     id: Optional[int] = Field(default_factory=uuid.uuid4, primary_key=True)

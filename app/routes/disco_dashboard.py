@@ -20,7 +20,7 @@ def all_bid(
     user_id = user_details.get("user_id")
     if user_details:
         try:
-            bid = session.query(Order).filter(Order.created_by == user_id).all()
+            bid = session.query(Order).filter(Order.trader_id == user_id).all()
             return bid
         except Exception as error:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))
@@ -51,7 +51,7 @@ def create_bid(
 
         for bid in bid_in:
             order_data = bid.dict()
-            order_data["created_by"] = str(user_id)
+            order_data["trader_id"] = str(user_id)
             order_data = Order.model_validate(order_data)
             session.add(order_data)
             session.commit()
@@ -77,7 +77,7 @@ def update_bid(*,
             bid = session.get(Order, id)
             if not bid:
                 raise HTTPException(status_code=404, detail="Order not found")
-            if bid.created_by != user_id:
+            if bid.trader_id != user_id:
                 raise HTTPException(status_code=403, detail="Not authorized to update this bid")
             else:
                 update_bid = bid_in.model_dump(exclude_unset=True)
