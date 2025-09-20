@@ -2,7 +2,6 @@ pydantic
 sqlmodel
 uvicorn
 jose
-jwt
 pyjwt
 # emails
 typing
