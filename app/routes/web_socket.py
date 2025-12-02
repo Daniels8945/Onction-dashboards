@@ -13,7 +13,7 @@ from pydantic import BaseModel, field_validator
 router = APIRouter()
 SessionInit = Annotated[Session, Depends(get_db)]
 
-@router.get("/")
+@router.get("/ws")
 async def get():
     """Serve a simple HTML client for testing"""
     html = """
