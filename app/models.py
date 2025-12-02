@@ -86,3 +86,9 @@ class Update(Create):
 
 class Message(BaseModel):
     message: str
+
+class SubmissionWindow(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    open_time: datetime
+    close_time: datetime
+    is_active: bool = Field(default=True)

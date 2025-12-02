@@ -1,4 +1,4 @@
-from fastapi import  Depends, APIRouter, HTTPException, status, Request
+from fastapi import APIRouter, HTTPException, status, Request
 from utils.utils import authenticate_and_get_user
 router = APIRouter()
 
@@ -14,5 +14,5 @@ def get_me(request: Request):
 
 
 @router.get('/user_profile')
-def user_profile(request: Request):
+def user_profile():
     pass

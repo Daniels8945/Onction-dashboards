@@ -8,13 +8,19 @@ load_dotenv()
 def authenticate_and_get_user(request: Request):
     clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
     jwt_key=os.getenv("JWT_KEY")
+
     try:
         request_state = clerk_sdk.authenticate_request(
             request,
             AuthenticateRequestOptions(
-                authorized_parties=["http://10.10.10.158:5173", "https://onction-dashboard.netlify.app"],
+                authorized_parties=[
+                    "http://10.10.10.158:5173",
+                    "http://172.20.10.4:5173",
+                    " http://localhost:5173",
+                    "https://onction-dashboard.netlify.app"
+                    ],
                 jwt_key=jwt_key
-            )
+            )   
         )
         if request_state.is_signed_in:
             user_id = request_state.payload.get("sub")
