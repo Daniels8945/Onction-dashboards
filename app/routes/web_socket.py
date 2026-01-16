@@ -86,7 +86,7 @@ def  submission_window_time() -> datetime:
             minute = (now.minute // 5) * 5
             return now.replace(minute= minute, second=0, microsecond=0)
 
-@router.post("/submission-window")
+@router.post("/create-submission-window")
 def set_window(*, data: SubmissionWindowInput, session: SessionInit):
     window = session.get(SubmissionWindow, 1)
 
@@ -108,13 +108,13 @@ def set_window(*, data: SubmissionWindowInput, session: SessionInit):
     return window
 
 
-@router.get("/submission-window")
+@router.get("/get-submission-window")
 def get_window(session: SessionInit):
     window = session.query(SubmissionWindow).all()
     return window
 
 
-@router.delete("/submission-window")
+@router.delete("/remove-submission-window")
 def delete_window(session: SessionInit):
     window = session.get(SubmissionWindow, 1)
     if window:
