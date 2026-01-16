@@ -1,6 +1,5 @@
 from collections.abc import Generator
-from sqlmodel import Session 
-from sqlmodel import create_engine, SQLModel, Session
+from sqlmodel import Session, create_engine, SQLModel, Session
 
 DATABASE_URL = "sqlite:///./database.db"
 engine = create_engine(DATABASE_URL, echo=True)

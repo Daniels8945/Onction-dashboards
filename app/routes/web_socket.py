@@ -1,7 +1,7 @@
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Depends
 from fastapi.responses import HTMLResponse
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from modules.websocket_connection import manager
 from models import SubmissionWindow
 from typing import Annotated
@@ -64,6 +64,15 @@ async def get():
 class SubmissionWindowInput(BaseModel):
     open_time: datetime
     close_time: datetime
+
+    # @field_validator('open_time', 'close_time', mode='before')
+    # def parse_datetime(cls, v):
+    #     current_time = timezone(timedelta(hours=1))
+    #     if isinstance(v, str):
+    #         now = datetime.now(current_time)
+    #         minute = (now.minute // 5) * 5
+    #         return now.replace(minute= minute, second=0, microsecond=0)
+    #     return v
     
     @field_validator('open_time', 'close_time', mode='before')
     def parse_datetime(cls, v):
@@ -71,18 +80,26 @@ class SubmissionWindowInput(BaseModel):
             return datetime.fromisoformat(v.replace('Z', '+00:00'))
         return v
 
+def  submission_window_time() -> datetime:
+            open_time = timezone(timedelta(hours=1))
+            now = datetime.now(open_time)
+            minute = (now.minute // 5) * 5
+            return now.replace(minute= minute, second=0, microsecond=0)
+
 @router.post("/submission-window")
-def set_window(data: SubmissionWindowInput, session: SessionInit):
+def set_window(*, data: SubmissionWindowInput, session: SessionInit):
     window = session.get(SubmissionWindow, 1)
+
 
     if not window:
         window = SubmissionWindow(
-            id=1,
+            id= id(1),
             open_time=data.open_time,
             close_time=data.close_time
         )
         session.add(window)
     else:
+        id = window.id + 1
         window.open_time = data.open_time
         window.close_time = data.close_time
 
@@ -91,6 +108,59 @@ def set_window(data: SubmissionWindowInput, session: SessionInit):
     return window
 
 
+@router.get("/submission-window")
+def get_window(session: SessionInit):
+    window = session.query(SubmissionWindow).all()
+    return window
+
+
+@router.delete("/submission-window")
+def delete_window(session: SessionInit):
+    window = session.get(SubmissionWindow, 1)
+    if window:
+        session.delete(window)
+        session.commit()
+    return {"detail": "Submission window deleted"}
+
+@router.put("/submission-window/reset")
+def reset_window(session: SessionInit):
+    window = session.get(SubmissionWindow, 1)
+    if window:
+        window.open_time = datetime.utcnow()
+        window.close_time = datetime.utcnow()
+        session.commit()
+        session.refresh(window)
+    return window
+
+@router.websocket("/ws/chat")
+async def chat_socket(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.broadcast(f"Chat message: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+@router.websocket("/ws/notifications")
+async def notifications_socket(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.broadcast(f"Notification: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+@router.websocket("/ws/echo")
+async def echo_socket(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"You said: {data}", websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 @router.websocket("/ws/countdown")
 async def countdown_socket(*,
