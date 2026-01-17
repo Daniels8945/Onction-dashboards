@@ -93,7 +93,7 @@ def set_window(*, data: SubmissionWindowInput, session: SessionInit):
     if not window:
         try:
             window = SubmissionWindow(
-                id= id(1),
+                # id= window.id(1),
                 open_time=data.open_time,
                 close_time=data.close_time
             )
@@ -101,10 +101,10 @@ def set_window(*, data: SubmissionWindowInput, session: SessionInit):
         except Exception as error:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))
     else:
-        id = window.id + 1
+        # id = window.id + 1
         window.open_time = data.open_time
         window.close_time = data.close_time
-        
+
     session.commit()
     session.refresh(window)
     return window
