@@ -1,4 +1,4 @@
-from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Depends
+from fastapi import WebSocket, WebSocketDisconnect, APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 import json
 from datetime import datetime, timezone, timedelta
@@ -90,19 +90,21 @@ def  submission_window_time() -> datetime:
 def set_window(*, data: SubmissionWindowInput, session: SessionInit):
     window = session.get(SubmissionWindow, 1)
 
-
     if not window:
-        window = SubmissionWindow(
-            id= id(1),
-            open_time=data.open_time,
-            close_time=data.close_time
-        )
-        session.add(window)
+        try:
+            window = SubmissionWindow(
+                id= id(1),
+                open_time=data.open_time,
+                close_time=data.close_time
+            )
+            session.add(window)
+        except Exception as error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= str(error))
     else:
         id = window.id + 1
         window.open_time = data.open_time
         window.close_time = data.close_time
-
+        
     session.commit()
     session.refresh(window)
     return window
